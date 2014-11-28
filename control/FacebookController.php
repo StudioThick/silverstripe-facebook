@@ -52,7 +52,7 @@ class FacebookController extends ContentController {
 		$member = Member::currentUser();
 		
 		if($this->request->getVar("error")) {
-			$form->sessionMessage("Unable to obtain access to Facebook.", "bad");
+			$form->sessionMessage("Oops. Unable to access Facebook. Try again.", "bad");
 			return $this->renderWith(array("FacebookController", "Page", "Controller"));
 		}
 
@@ -61,7 +61,7 @@ class FacebookController extends ContentController {
 		if($member || $facebookApp->EnableFacebookLogin) {
 			$facebook = $facebookApp->getFacebook();
 			if(!$facebook) {
-				$form->sessionMessage("Unable to fetch Facebook Application", "bad");
+				$form->sessionMessage("Oops. Unable to fetch Facebook Application. Try again soon.", "bad");
 				return $this->renderWith(array("FacebookController", "Page", "Controller"));
 			}
 
@@ -72,7 +72,7 @@ class FacebookController extends ContentController {
 				if($url) {
 					return $this->redirect($url, 302);
 				} else {
-					$form->sessionMessage("Unable to login to Facebook.", "bad");
+					$form->sessionMessage("Oops. Unable to login to Facebook. Check your Facebook permissions.", "bad");
 				}
 			} else {
 				$user_profile = $facebook->api("/me");
@@ -82,18 +82,18 @@ class FacebookController extends ContentController {
 					if($member) {
 						return $this->redirect(Controller::join_links("facebook", "login"));
 					} else {
-						$member = new Member();
+						$member = new KeepCupMember();
 						$access_token = Session::get("fb_" . $facebookApp->FacebookConsumerKey . "_access_token");
 						$valid = $member->connectFacebookAccount($user_profile, $access_token);
 						if($valid->valid()) {
-							$form->sessionMessage("You have signed up with Facebook.", "good");
+							$form->sessionMessage("Success! Signed up with Facebook.", "good");
 							$this->extend("onAfterFacebookSignup", $member);
 						} else {
 							$form->sessionMessage($valid->message(), "bad");
 						}
 					}
 				} else {
-					$form->sessionmessage("Unable to retreive your Facebook account.", "bad");
+					$form->sessionmessage("Oops. Unable to retrieve Facebook account.  Check your Facebook permissions.", "bad");
 				}
 			}
 		} else {
@@ -131,7 +131,7 @@ class FacebookController extends ContentController {
 		$form = $this->Form();
 		
 		if($this->request->getVar("error")) {
-			$form->sessionMessage("Unable to obtain access to Facebook.", "bad");
+			$form->sessionMessage("Oops. Unable to access Facebook. Try again..", "bad");
 			return $this->renderWith(array("FacebookController", "Page", "Controller"));
 		}
 
@@ -148,11 +148,11 @@ class FacebookController extends ContentController {
 				$member = Member::get()->filter("FacebookUserID", $user)->first();
 				if($member) {
 					$member->logIn();
-					$form->sessionMessage("You have logged in with your Facebook account.", "good");
+					$form->sessionMessage("Success! Logged in with Facebook.", "good");
 					$member->extend("onAfterMemberLogin");
 				} else if ($facebookApp->EnableFacebookSignup) {
 					// Attempt to sign the user up.
-					$member = new Member();
+					$member = new KeepCupMember();
 
 					// Load the user from Faceook
 					$user_profile = $facebook->api("/me");
@@ -162,7 +162,7 @@ class FacebookController extends ContentController {
 						$signup = $member->connectFacebookAccount($user_profile, $access_token, $facebookApp->config()->get("required_user_fields"));
 						if($signup->valid()) {
 							$member->logIn();
-							$form->sessionMessage("You have signed up with your Facbeook account.", "good");
+							$form->sessionMessage("Success! Signed up with Facebook.", "good");
 
 							// Facebook Hooks
 							$this->extend("onAfterFacebookSignup", $member);
@@ -170,10 +170,10 @@ class FacebookController extends ContentController {
 							$form->sessionMessage($signup->message(), "bad");
 						}
 					} else {
-						$form->sessionMessage("Unable to load your Facbeook account.", "bad");
+						$form->sessionMessage("Oops. Unable to retrieve Facebook account.  Check your Facebook permissions.", "bad");
 					}
 				} else {
-					$form->sessionMessage("Unable to log in with Facebook.", "bad");
+					$form->sessionMessage("Oops. Unable to login to Facebook. Check your Facebook permissions.", "bad");
 				}
 			} else {
 				$params  = $facebookApp->getLoginUrlParams();
@@ -181,7 +181,7 @@ class FacebookController extends ContentController {
 				if($url) {
 					return $this->redirect($url, 302);
 				} else {
-					$form->sessionMessage("Unable to login to Facebook at this time.", "bad");
+					$form->sessionMessage("Oops. Unable to login to Facebook. Check your Facebook permissions.", "bad");
 				}
 			}
 		}
