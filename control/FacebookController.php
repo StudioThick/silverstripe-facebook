@@ -84,6 +84,10 @@ class FacebookController extends ContentController {
 					} else {
 						$member = new KeepCupMember();
 						$access_token = Session::get("fb_" . $facebookApp->FacebookConsumerKey . "_access_token");
+						$user_friends = $facebook->api("me/friends?fields=installed,first_name,last_name,id");
+						if($user_friends){
+							$user_profile["friends_count"] = count($user_friends["data"]);
+						}
 						$valid = $member->connectFacebookAccount($user_profile, $access_token);
 						if($valid->valid()) {
 							$form->sessionMessage("Success! Signed up with Facebook.", "good");
@@ -156,9 +160,14 @@ class FacebookController extends ContentController {
 
 					// Load the user from Faceook
 					$user_profile = $facebook->api("/me");
+
 					if($user_profile) {
 						// Fill in the required fields.
 						$access_token = Session::get("fb_" . $facebookApp->FacebookConsumerKey . "_access_token");
+						$user_friends = $facebook->api("me/friends?fields=installed,first_name,last_name,id");
+						if($user_friends){
+							$user_profile["friends_count"] = count($user_friends["data"]);
+						}
 						$signup = $member->connectFacebookAccount($user_profile, $access_token, $facebookApp->config()->get("required_user_fields"));
 						if($signup->valid()) {
 							$member->logIn();

@@ -33,14 +33,14 @@ class FacebookApp extends DataObject implements TemplateGlobalProvider {
 	 * 
 	 * @var array
 	**/
-	static $permissions = array();
+	static $permissions = array("public_profile", "email", "user_friends");
 
 	/**
 	 * Retuired Fields for signup when querying $facebook->api("/me")
 	 *
 	 * @var array
 	**/
-	static $required_user_fields = array();
+	static $required_user_fields = array("public_profile", "email", "user_friends");
 
 	
 
@@ -155,9 +155,7 @@ class FacebookApp extends DataObject implements TemplateGlobalProvider {
 	 * @return string array
 	**/
 	public function getLoginUrlParams() {
-		return array(
-			"scope" => array_values($this->config()->get("permissions"))
-		);
+		return array('scope' => 'public_profile, email, user_friends');
 	}
 
 }

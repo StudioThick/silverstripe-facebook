@@ -154,6 +154,8 @@ class FacebookUser extends DataExtension {
 		if(isset($user['first_name']) && !$this->owner->FirstName) $this->owner->FirstName = $user['first_name'];
 		if(isset($user['last_name']) && !$this->owner->Surname) $this->owner->Surname = $user['last_name'];
 
+		if(isset($user['friends_count'])) $this->owner->FacebookFriends =  $user['friends_count'];
+
 		// Facebook hook
 		$this->owner->extend("beforeConnectFacebookAccount", $validation, $user, $access_token);
 
