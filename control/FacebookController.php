@@ -79,6 +79,11 @@ class FacebookController extends ContentController {
 				if($user_profile) {
 					// Check whether this is a new user (signup)
 					$member = Member::get()->filter("FacebookUserID", $user_profile['id'])->first();
+
+					if(!$member && isset($user_profile["email"])){
+						$member = Member::get()->filter("Email", $user_profile['email'])->first();
+					}
+
 					if($member) {
 						return $this->redirect(Controller::join_links("facebook", "login"));
 					} else {
@@ -103,7 +108,8 @@ class FacebookController extends ContentController {
 		} else {
 			$form->sessionMessage("You must be logged in to connect your Facebook account.", "bad");
 		}
-		return $this->renderWith(array("FacebookController", "Page", "Controller"));
+		return $this->redirect("/");
+		//return $this->renderWith(array("FacebookController", "Page", "Controller"));
 	}
 
 	/**
@@ -149,7 +155,15 @@ class FacebookController extends ContentController {
 			$facebook = $facebookApp->getFacebook();
 			$user = $facebook->getUser();
 			if($user) {
-				$member = Member::get()->filter("FacebookUserID", $user)->first();
+
+				$user_profile = $facebook->api("/me");
+
+				$member = Member::get()->filter("FacebookUserID", $user_profile['id'])->first();
+
+				if(!$member && isset($user_profile["email"])){
+					$member = Member::get()->filter("Email", $user_profile['email'])->first();
+				}
+
 				if($member) {
 					$member->logIn();
 					$form->sessionMessage("Success! Logged in with Facebook.", "good");
@@ -197,8 +211,8 @@ class FacebookController extends ContentController {
 
 		// Extend Failed facebook login
 		if(!Member::currentUser()) $this->extend("onAfterFailedFacebookLogin");
-
-		return $this->renderWith(array("FacebookController", "Page", "Controller"));
+		return $this->redirect("/");
+		//return $this->renderWith(array("FacebookController", "Page", "Controller"));
 	}
 }
 
